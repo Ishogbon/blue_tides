@@ -14,11 +14,11 @@ type Response struct {
 	Data    Data
 }
 
-func (rd *Response) writeJsonResponse(w http.ResponseWriter, statusCode int) {
+func (rd *Response) WriteJsonResponse(w http.ResponseWriter, statusCode int) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 
-	if err := json.NewEncoder(w).Encode(rd); err != nil {
+	if json.NewEncoder(w).Encode(rd) != nil {
 		http.Error(w, "Failed To Encode Error", http.StatusInternalServerError)
 	}
 }
@@ -27,7 +27,7 @@ func imAlive(w http.ResponseWriter, r *http.Request) {
 	var returnData Response = Response{
 		"success", "Ping was successfull", Data{},
 	}
-	returnData.writeJsonResponse(w, 200)
+	returnData.WriteJsonResponse(w, 200)
 }
 
 func StartServer() {
