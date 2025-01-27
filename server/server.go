@@ -1,6 +1,7 @@
 package server
 
 import (
+	"blue_tides/server/websocket"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -32,6 +33,8 @@ func imAlive(w http.ResponseWriter, r *http.Request) {
 
 func StartServer() {
 	http.HandleFunc("/health", imAlive)
+	manager := websocket.NewManager()
+	http.HandleFunc("/ws", manager.ServeWs)
 	log.Println("Server running on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

@@ -1,6 +1,12 @@
 package websocket
 
-import "sync"
+import (
+	"log"
+	"net/http"
+	"sync"
+
+	"github.com/gorilla/websocket"
+)
 
 type Manager struct {
 	clients ClientList
@@ -9,6 +15,27 @@ type Manager struct {
 
 func NewManager() *Manager {
 	return &Manager{}
+}
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
+
+func (manager *Manager) ServeWs(responseWriter http.ResponseWriter, request *http.Request) {
+
+	conn, err := upgrader.Upgrade(responseWriter, request, nil)
+
+	if err != nil {
+		log.Println("Error occurred during connection", err)
+		return
+	}
+
+	client := NewClient(conn, manager)
+	manager.addClient(client)
+
+	go client.readMessages()
+	go client.writeMessages()
 }
 
 func (manager *Manager) addClient(client *Client) {
