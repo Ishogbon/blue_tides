@@ -3,6 +3,7 @@ package websocket
 import (
 	"log"
 	"net/http"
+	"strconv"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -14,7 +15,7 @@ type Manager struct {
 }
 
 func NewManager() *Manager {
-	return &Manager{}
+	return &Manager{clients: make(ClientList)}
 }
 
 var upgrader = websocket.Upgrader{
@@ -43,6 +44,7 @@ func (manager *Manager) addClient(client *Client) {
 	defer manager.Unlock()
 
 	manager.clients[client] = true
+	log.Println("Added Client nth: " + strconv.Itoa(len(manager.clients)))
 }
 
 func (manager *Manager) removeClient(client *Client) {

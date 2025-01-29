@@ -35,6 +35,6 @@ func StartServer() {
 	http.HandleFunc("/health", imAlive)
 	manager := websocket.NewManager()
 	http.HandleFunc("/ws", manager.ServeWs)
-	log.Println("Server running on port 8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Println("Server running on port 8888")
+	log.Fatal(http.ListenAndServe(":8888", nil))
 }
