@@ -15,6 +15,7 @@ type Client struct {
 	egress chan []byte
 }
 
+// Using this is non conventional, it is moe appropriate to use the first letter instead e.g c instead of connection
 func NewClient(connection *websocket.Conn, manager *Manager) *Client {
 	return &Client{
 		connection,
