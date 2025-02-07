@@ -7,10 +7,13 @@ import (
 )
 
 type File struct {
-	path string
+	path              string
+	fileBufferChannel chan []byte
 }
 
-func (file *File) ReadFile(bytesSize int) error {
+func (file *File) ReadFile(bytesize int) error {
+	// file.fileBufferChannel = make(chan []byte)
+
 	fi, err := os.Open(file.path)
 	if err != nil {
 		return err
@@ -18,7 +21,7 @@ func (file *File) ReadFile(bytesSize int) error {
 
 	defer fi.Close()
 
-	bytesBuffer := make([]byte, bytesSize)
+	bytesBuffer := make([]byte, bytesize)
 
 	reader := bufio.NewReader(fi)
 
@@ -26,10 +29,9 @@ func (file *File) ReadFile(bytesSize int) error {
 		n, err := reader.Read(bytesBuffer)
 
 		if n > 0 {
-			fmt.Print(string(bytesBuffer[:n])) // Print the read bytes
+			fmt.Print(string(bytesBuffer[:n]))
 		}
 
-		// Check for EOF (End of File)
 		if err != nil {
 			break
 		}

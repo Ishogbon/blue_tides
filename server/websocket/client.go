@@ -47,11 +47,15 @@ func (client *Client) writeMessages() {
 		client.manager.removeClient(client)
 	}()
 
-	for {
+	// This code will exit if all the channels used are closed, which is set to nil, in this case 1
+	for count := 0; count < 1; {
 		select {
 		case messsage, ok := <-client.egress:
 			if !ok {
 				if err := client.connection.WriteMessage(websocket.CloseMessage, nil); err != nil {
+					// This case will never be trigerred again.
+					client.egress = nil
+					count++
 					log.Println("connection failed", err)
 				}
 				return
