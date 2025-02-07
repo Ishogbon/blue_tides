@@ -12,7 +12,7 @@ type File struct {
 }
 
 func (file *File) ReadFile(bytesize int) error {
-	// file.fileBufferChannel = make(chan []byte)
+	file.fileBufferChannel = make(chan []byte)
 
 	fi, err := os.Open(file.path)
 	if err != nil {

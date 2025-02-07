@@ -44,6 +44,7 @@ func (client *Client) readMessages() {
 
 func (client *Client) writeMessages() {
 	defer func() {
+		close(client.egress)
 		client.manager.removeClient(client)
 	}()
 
