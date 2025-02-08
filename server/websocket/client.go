@@ -48,6 +48,7 @@ func (client *Client) writeMessages() {
 		client.manager.removeClient(client)
 	}()
 
+	//
 	// This code will exit if all the channels used are closed, which is set to nil, in this case 1
 	for count := 0; count < 1; {
 		select {
