@@ -1,7 +1,9 @@
 package websocket
 
 import (
+	"blue_tides/handler"
 	"log"
+	"os"
 
 	"github.com/gorilla/websocket"
 )
@@ -29,17 +31,22 @@ func (client *Client) readMessages() {
 
 	}()
 
-	for {
-		messageType, payload, err := client.connection.ReadMessage()
-		if err != nil {
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("Unexpected Close Error %v", err)
-			}
-			break
+	// I removed the for loop to prevent multiple movie plays attempt, considering the fact for this test, only needs be done once.
+	// for {
+	_, payload, err := client.connection.ReadMessage()
+	if err != nil {
+		if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+			log.Printf("Unexpected Close Error %v", err)
 		}
-		log.Print(messageType)
-		log.Print(payload)
+		// break
 	}
+	movieName := string(payload)
+
+	// Norms this should have been abstracted away into it's own function
+	movie := handler.Movie{}
+
+	movie.PlayMovie(os.Getenv("MOVIE_DIRECTORY"), movieName)
+	// }
 }
 
 func (client *Client) writeMessages() {
@@ -48,7 +55,6 @@ func (client *Client) writeMessages() {
 		client.manager.removeClient(client)
 	}()
 
-	//
 	// This code will exit if all the channels used are closed, which is set to nil, in this case 1
 	for count := 0; count < 1; {
 		select {

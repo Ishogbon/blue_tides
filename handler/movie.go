@@ -26,7 +26,7 @@ func (m *Movie) ReadMovieMeta(movieMetaPath string) MovieMeta {
 
 	movieMetaFile, err := os.ReadFile(movieMetaPath)
 	if err != nil {
-		panic(fmt.Sprintf("Unable to read meta for Movie as Movie at %s", movieMetaFile))
+		panic(fmt.Sprintf("Unable to read meta for Movie at %s", movieMetaPath))
 	}
 	var meta MovieMeta
 	err = json.Unmarshal(movieMetaFile, &meta)
@@ -36,7 +36,7 @@ func (m *Movie) ReadMovieMeta(movieMetaPath string) MovieMeta {
 	return meta
 }
 
-func (m *Movie) PlayMovie(movieDir, movieName string) {
+func (m *Movie) PlayMovie(movieDir string, movieName string) {
 	if m.fileBufferChannel != nil {
 		close(m.fileBufferChannel)
 	}
@@ -44,6 +44,6 @@ func (m *Movie) PlayMovie(movieDir, movieName string) {
 	movieLoc := filepath.Join(movieDir, movieName)
 	// asssume meta file is .meta.json
 	movieMeta := m.ReadMovieMeta(movieLoc + ".meta.json")
-
+	m.path = movieLoc
 	m.ReadFile(int(movieMeta.Scale))
 }
