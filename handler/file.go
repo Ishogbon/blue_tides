@@ -28,7 +28,7 @@ func (file *File) ReadFile(bytesize int) error {
 		n, err := reader.Read(bytesBuffer)
 
 		if n > 0 {
-			fmt.Print(string(bytesBuffer[:n]))
+			fmt.Print(bytesBuffer[:n])
 		}
 
 		if err != nil {
