@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 type MovieMeta struct {
@@ -20,6 +21,7 @@ type MovieBuffer interface {
 
 type Movie struct {
 	File
+	FrameBenchmarksChannel chan time.Duration
 }
 
 func (m *Movie) ReadMovieMeta(movieMetaPath string) MovieMeta {
@@ -36,14 +38,17 @@ func (m *Movie) ReadMovieMeta(movieMetaPath string) MovieMeta {
 	return meta
 }
 
-func (m *Movie) PlayMovie(movieDir string, movieName string) {
-	if m.fileBufferChannel != nil {
-		close(m.fileBufferChannel)
-	}
-
+func (m *Movie) PlayMovie(movieDir string, movieName string, streamMovie func([]byte, time.Duration)) {
 	movieLoc := filepath.Join(movieDir, movieName)
+	frameLoadStartTime := time.Now()
 	// asssume meta file is .meta.json
 	movieMeta := m.ReadMovieMeta(movieLoc + ".meta.json")
 	m.path = movieLoc
-	m.ReadFile(int(movieMeta.Scale))
+	m.ReadFile(int(movieMeta.Scale), func(b []byte) {
+		defer func() {
+			frameLoadStartTime = time.Now()
+		}()
+		frameLoadTime := time.Since(frameLoadStartTime)
+		streamMovie(b, frameLoadTime)
+	})
 }

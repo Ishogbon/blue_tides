@@ -2,8 +2,11 @@ package websocket
 
 import (
 	"blue_tides/handler"
+	"fmt"
 	"log"
 	"os"
+	"path/filepath"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -45,7 +48,37 @@ func (client *Client) readMessages() {
 	// Norms this should have been abstracted away into it's own function
 	movie := handler.Movie{}
 
-	movie.PlayMovie(os.Getenv("MOVIE_DIRECTORY"), movieName)
+	frameLoadTimeChannel := make(chan time.Duration)
+
+	filePath := filepath.Join(os.Getenv("MOVIE_DIRECTORY"), movieName+".timestamp.log")
+	dir := filepath.Dir(filePath)
+	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+		fmt.Printf("failed to create directory: %v\n", err)
+		return
+	}
+
+	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+
+	go func() {
+		frameLoadTime := <-frameLoadTimeChannel
+		if err != nil {
+			fmt.Printf("failed to open file: %v\n", err)
+			return
+		}
+		defer file.Close()
+
+		// Write the data to the file
+		if _, err := file.WriteString(fmt.Sprintf("%v\n", frameLoadTime)); err != nil {
+			fmt.Printf("failed to write to file: %v\n", err)
+			return
+
+		}
+
+	}()
+	movie.PlayMovie(os.Getenv("MOVIE_DIRECTORY"), movieName, func(movieByteFrame []byte, frameLoadDuration time.Duration) {
+		client.egress <- movieByteFrame
+		frameLoadTimeChannel <- frameLoadDuration
+	})
 	// }
 }
 
