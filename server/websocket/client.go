@@ -14,6 +14,7 @@ import (
 type ClientList map[*Client]bool
 
 type Client struct {
+	id         int
 	connection *websocket.Conn
 	manager    *Manager
 	// egress is a channel used to avoid concurrent writes out of the websocket connection
@@ -23,6 +24,7 @@ type Client struct {
 // Using this is non conventional, it is moe appropriate to use the first letter instead e.g c instead of connection
 func NewClient(connection *websocket.Conn, manager *Manager) *Client {
 	return &Client{
+		len(manager.clients) + 1,
 		connection,
 		manager,
 		make(chan []byte),
@@ -50,7 +52,7 @@ func (client *Client) readMessages() {
 
 	frameLoadTimeChannel := make(chan time.Duration)
 
-	filePath := filepath.Join(os.Getenv("MOVIE_DIRECTORY"), movieName+".timestamp.log")
+	filePath := filepath.Join(os.Getenv("MOVIE_DIRECTORY"), fmt.Sprintf("%s.clients-%d.timestamp.log", movieName, client.id))
 	dir := filepath.Dir(filePath)
 	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
 		fmt.Printf("failed to create directory: %v\n", err)
